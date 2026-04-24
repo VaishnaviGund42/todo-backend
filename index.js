@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
- const PORT = 3000;
+ const PORT = process.env.PORT || 3000;
 
  app.use(express.json());
  app.use(cors());
@@ -37,8 +37,18 @@ let todos = [
 
 app.post("/todos", (req,res) => {
      const data = req.body;
-     todos.push(data);
-     res.send("Todo created!");
+     if (!data || !data.title || !String(data.title).trim()) {
+        res.status(400).send("Title is required");
+        return;
+     }
+
+     const nextId = todos.length ? Math.max(...todos.map((todo) => Number(todo.id) || 0)) + 1 : 1;
+     const newTodo = {
+      id: nextId,
+      title: String(data.title).trim()
+     };
+     todos.push(newTodo);
+     res.status(201).send(newTodo);
 
 })
 
